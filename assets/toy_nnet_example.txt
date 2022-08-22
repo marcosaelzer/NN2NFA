@@ -1,0 +1,17 @@
+# Toy Neural Network Example
+#
+# a node is specified as ([weights],bias,activation)
+# a layer is specified as node; node; ... node
+# currently supported activations are 'relu' and 'id'
+
+# input dimension of the network
+input_size = 3
+
+# first layer
+([-0.1,4,0],1,relu); ([0,1,-4.0],0,relu)
+
+# second layer
+([0.003, 0],1,relu); ([0.023,102],0,relu); ([32,0.001],0.5,relu)
+
+# third (and last) layer
+([0.003233,0.034,10],0.5,id); ([0,0,1],1,id); ([45,0.03,0.009],0.5,id); ([89.4,20.3,9],1,id); ([0.1,2,0.0232323],0.0,id); ([0.00001,90,29938],0.8,id)
