@@ -12,6 +12,8 @@ from .parser.ToyNNetListener import ToyNNetListener
 
 import numpy as np
 
+from ..out_reach_properties.out_reach_property import OutReachProperty
+
 
 class _ToyNNetGenerator(ToyNNetListener):
     """ Generator to read in toy neural networks from *.txt
@@ -70,7 +72,7 @@ class _ToyNNetGenerator(ToyNNetListener):
             raise ValueError('The number of weights in node ' + str(self._node_count)
                              + ' of layer ' + str(self._layer_count) + ' is not correct. It has '
                              + str(len(neuron_weights_list)) + ' weights but ' + (str(self._previous_layer_size))
-                             + ' are expcted.')
+                             + ' are expected.')
 
         # append weights, bias and activation to current layer
         self.network_weights[-1].append(neuron_weights_list)
@@ -96,7 +98,7 @@ class ToyNNetwork:
          weights (list of (list of (list of float))): Weights of the network.
          bias (list of (list of float): Bias of the network.
          activations (list of (list of string)): Activation functions of the network
-
+         output_size (int): Output dimension of the network.
     """
 
     def __init__(self, input_size, weights, bias, activations):
@@ -104,6 +106,7 @@ class ToyNNetwork:
         self.weights = weights
         self.bias = bias
         self.activations = activations
+        self.output_size = len(weights[-1])
 
     def compute_layer_output(self, input, layer):
         """ Computes the networks output for given input.
@@ -186,12 +189,12 @@ class ToyNNetwork:
     def get_neuron_activation(self, layer_index, neuron_index) -> str:
         return self.activations[layer_index][neuron_index]
 
-
     def __str__(self):
         return 'Input Size: ' + str(self.input_size) + '\n' \
                + 'Weights:\n' + str(self.weights) + '\n' \
                + 'Bias:\n' + str(self.bias) + '\n' \
-               + 'Activations:\n' + str(self.activations)
+               + 'Activations:\n' + str(self.activations) + '\n' \
+               + 'Output Size: ' + str(self.output_size)
 
     def __repr__(self):
         return "ToyNNet()"
