@@ -1,6 +1,8 @@
 # class to represent sets of intervals of non-negative integers
 # currently based on simple ordered lists
 # TODO: change to balanced search-tree implementation
+from collections import defaultdict
+import bisect
 
 class FatStateSet:
     # a fat set is a list of non-negative integer pairs [(a_1,b_1),(a_2,b_2),...,(a_n,b_n)]
@@ -8,9 +10,13 @@ class FatStateSet:
     # and representing the set {a_1,..,b_1,a_2,..,b_2,...,a_n..,b_n}
 
     states = []
+    lefts = []
+    rights = dict()
 
     def __init__(self):
         self.states = []
+        self.lefts = []
+        self.rights = dict()
 #        return self
 
 #    def __init__(self, p:int, q:int):
@@ -26,7 +32,7 @@ class FatStateSet:
     last_iterate = -1
 
     def is_empty(self):
-        return self.states == []
+        return self.lefts == []
 
     def __reset_iterator(self):
         current_interval=0
@@ -39,7 +45,8 @@ class FatStateSet:
         """
         s = "{"
         first = True
-        for (a,b) in self.states:
+        for a in self.lefts:
+            b = self.rights[a]
             if not first:
                 s += ","
             first = False
@@ -50,18 +57,142 @@ class FatStateSet:
         s += "}"
         return s
 
+    def find_nearest_begin(self, x):
+        return bisect.bisect(self.lefts, x)-1
+
     def contains(self, q:int):
         """
         checks whether state q is contained in this fat set
         :param q:
         :return:
         """
-        for (a,b) in self.states:
-            if a <= q and q <= b:
-                return True
+        index = self.find_nearest_begin(q)
+        if index == -1:
+            return False
+        a = self.lefts[index]
+        b = self.rights[a]
+        if a <= q <= b:
+            return True
         return False
 
-    def add_state(self,q:int):
+    def lefts_contain(self, q):
+        i = bisect.bisect_left(self.lefts, q)
+        if i != len(self.lefts) and self.lefts[i] == q:
+            return i
+        return -1
+    def contains_rec(self, q) -> bool:
+        def contains_helper(q, l, r):
+            m = (l+r) //2
+            (a, b) = self.states[m]
+            if a <= q <= b:
+                return True
+            elif l == r:
+                return False
+            elif q < a:
+                if m == l:
+                    return False
+                return contains_helper(q, l, m-1)
+            else:
+                if m == len(self.states) - 1:
+                    return False
+                return contains_helper(q, m+1, r)
+
+        if len(self.states) == 0:
+            return False
+        else:
+            return contains_helper(q, 0, len(self.states)-1)
+
+    def add_state(self, q):
+        if len(self.lefts) == 0:
+            self.lefts.append(q)
+            self.rights[q] = q
+        index = self.find_nearest_begin(q)
+        if index == -1:
+            a = self.lefts[0]
+            if q == a-1:
+                self.lefts[0] = q
+                self.rights[q] = self.rights[a]
+                del self.rights[a]
+            else:
+                self.lefts.insert(0, q)
+                self.rights[q] = q
+
+        a = self.lefts[index]
+        b = self.rights[a]
+        if a <= q and q <= b:
+            return
+        elif b + 1 == q:
+            self.rights[a] = q
+            res = self.lefts_contain(q+1)
+            if res != -1:
+                self.rights[a] = self.rights[q+1]
+                self.lefts.pop(res)
+                del self.rights[q+1]
+        elif q > b+1:
+            res = self.lefts_contain(q + 1)
+            if res != -1:
+                self.lefts.pop(res)
+                self.lefts.insert(res, q)
+                self.rights[q] = self.rights[q+1]
+                del self.rights[q+1]
+            else:
+                bisect.insort(self.lefts, q)
+                self.rights[q] = q
+
+        self.__reset_iterator()
+
+    def add_state_rec(self, q):
+        def add_state_helper(q, l, r):
+            m = (l + r) // 2
+            (a, b) = self.states[m]
+            if a <= q <= b:
+                return
+            elif b < q-1:
+                if m == len(self.states) - 1:
+                    self.states.append((q,q))
+                    return
+                elif q < self.states[m+1][0]-1:
+                    self.states.insert(m+1, (q, q))
+                    return
+                add_state_helper(q, m+1, r)
+            elif a > q+1:
+                if m == 0:
+                    self.states.insert(m, (q,q))
+                    return
+                elif q > self.states[m-1][1]+1:
+                    self.states.insert(m, (q,q))
+                    return
+                add_state_helper(q, l, m-1)
+            elif q == a-1:
+                if m == 0:
+                    self.states[m] = (q,b)
+                else:
+                    (c,d) = self.states[m-1]
+                    if d == q-1:
+                        self.states[m-1] = (c,b)
+                        self.states.pop(m)
+                    else:
+                        self.states[m] = (q,b)
+                return
+            elif q == b+1:
+                if m == len(self.states) - 1:
+                    self.states[m] = (a,q)
+                else:
+                    (c,d) = self.states[m+1]
+                    if c == q+1:
+                        self.states[m+1] = (a,d)
+                        self.states.pop(m)
+                    else:
+                        self.states[m] = (a,q)
+                return
+
+
+        if len(self.states) == 0:
+            self.states.append((q, q))
+        add_state_helper(q, 0, len(self.states)-1)
+        self.__reset_iterator()
+
+    def add_state_old(self,q:int):
         """
         adds a state to this fat set
         :param q:
@@ -105,7 +236,85 @@ class FatStateSet:
             self.states.append((q,q))
         self.__reset_iterator()
 
-    def add_states(self, p:int, q:int):
+    def add_states(self, p, q):
+        if len(self.lefts) == 0:
+            self.lefts.append(p)
+            self.rights[p] = q
+        elif not p <= q:
+            return
+        elif p == q:
+            self.add_state(p)
+
+        index_a = self.find_nearest_begin(p)
+
+        if index_a == -1:
+            a = self.lefts[0]
+            b = self.rights[a]
+            index_a = 0
+            if q > b:
+                self.lefts[0] = p
+                self.rights[p] = self.rights[a]
+                del self.rights[a]
+            elif q < a - 1:
+                self.lefts.insert(0, p)
+                self.rights[p] = q
+            else:
+                self.lefts[0] = p
+                self.rights[p] = b
+                del self.rights[a]
+
+        a = self.lefts[index_a]
+        b = self.rights[a]
+        if q <= b:
+            return
+        else:
+            index_b = self.find_nearest_begin(q)
+            c = self.lefts[index_b]
+            d = self.rights[c]
+
+            if a <= p <= b+1:
+                if index_b + 1 < len(self.lefts):
+                    next_a = self.lefts[index_b+1]
+                else:
+                    next_a = -1
+                slice = self.lefts[index_a+1: index_b+1]
+                tmp = self.lefts.copy()
+                self.lefts = tmp[:index_a+1] + tmp[index_b+1:]
+                if q > d:
+                    if next_a != -1 and q == next_a-1:
+                        self.rights[a] = self.rights[next_a]
+                        slice.append(next_a)
+                        self.lefts.remove(next_a)
+                    else:
+                        self.rights[a] = q
+                else:
+                    self.rights[a] = d
+                for l in slice:
+                    del self.rights[l]
+            else:
+                if index_b + 1 < len(self.lefts):
+                    next_a = self.lefts[index_b+1]
+                else:
+                    next_a = -1
+                slice = self.lefts[index_a+1: index_b + 1]
+                tmp = self.lefts.copy()
+                self.lefts = tmp[:index_a + 1] + [p] + tmp[index_b + 1:]
+                if q > d:
+                    if next_a != -1 and q == next_a - 1:
+                        self.rights[p] = self.rights[next_a]
+                        slice.append(next_a)
+                        self.lefts.remove(next_a)
+                    else:
+                        self.rights[p] = q
+                else:
+                    self.rights[p] = d
+                for l in slice:
+                    del self.rights[l]
+
+        self.__reset_iterator()
+
+
+    def add_states_old(self, p:int, q:int):
         """
         adds the range {p,...,q} to this fat set
         :param p:
@@ -145,7 +354,28 @@ class FatStateSet:
             self.states.append((low,high))
         self.__reset_iterator()
 
-    def remove_state(self,q:int):
+    def remove_state(self, q):
+        index = self.find_nearest_begin(q)
+        if index == -1:
+            return
+        a = self.lefts[index]
+        b = self.rights[a]
+        if a == q:
+            self.lefts.pop(index)
+            if a!=b:
+                self.lefts.insert(index, a+1)
+                self.rights[a+1] = self.rights[a]
+            del self.rights[a]
+        elif a < q < b:
+            self.rights[a] = q-1
+            self.lefts.insert(index+1, q+1)
+            self.rights[q+1] = b
+        elif b == q:
+            self.rights[a] = b-1
+        elif q > b:
+            return
+
+    def remove_state_old(self,q:int):
         """
         removes state q from this fat set; leaves it unchanged if q is not contained
         :param q:
@@ -176,55 +406,45 @@ class FatStateSet:
         self.__reset_iterator()
 
     def __max(self):
-        l = len(self.states)
+        l = len(self.lefts)
         if l == 0:
             return None
         else:
-            (_,b) = self.states[l-1]
-            return b
+            return self.rights[l-1]
 
     def extract_min(self):
-        if len(self.states) == 0:
+        if len(self.lefts) == 0:
             return None
         else:
-            (a,b) = self.states[0]
+            a = self.lefts[0]
+            b = self.rights[a]
             if a==b:
-                self.states.pop(0)
+                self.lefts.pop(0)
+                del self.rights[a]
                 return a
             else:
-                self.states[0] = (a+1,b)
+                self.lefts[0] = a+1
+                self.rights[a+1] = self.rights[a]
+                del self.rights[a]
                 return a
 
-    def complement(self, n:int):
-        """
-        complements a fat set with respect to the set {0,...,n-1}
-        :param n:
-        :return:
-        """
-        comp = FatStateSet()
+    def intersect_from(self, q):
+        index = self.find_nearest_begin(q)
+        a = self.lefts[index]
+        b = self.rights[a]
+        if q <= b:
+            self.lefts[index] = q
+            self.rights[q] = self.rights[a]
+            del self.rights[a]
+        else:
+            index += 1
+        for i in range(index):
+            del self.rights[self.lefts[i]]
+        self.lefts = self.lefts[index:]
 
-        l = len(self.states)
-        m = n-1
+        self.__reset_iterator()
 
-        if l > 0:
-            (_,b) = self.states[l-1]
-            if b+1 <= m:
-                comp.add_states(b+1,m)
-
-        for i in range(l-2,-1,-1):
-            (_,b) = self.states[i]
-            (c,_) = self.states[i+1]
-            if b+1 <= m:
-                comp.add_states(b+1,min(c-1,m))
-
-        if l > 0:
-            (a,_) = self.states[0]
-            if a > 0:
-                comp.add_states(0,a-1)
-
-        return comp
-
-    def intersect_from(self, q:int):
+    def intersect_from_old(self, q:int):
         """
         crop this fat set to those elements satisfying >= q
         :param q:
@@ -247,9 +467,8 @@ class FatStateSet:
         :return:
         """
         copy = FatStateSet()
-        for i in range(len(self.states)-1,-1,-1):
-            (a,b) = self.states[i]
-            copy.add_states(a,b)
+        copy.lefts = self.lefts.copy()
+        copy.rights = self.rights.copy()
         return copy
 
     def __iter__(self):
@@ -259,8 +478,9 @@ class FatStateSet:
 
     def __next__(self):
         found = False
-        while self.current_interval < len(self.states) and not found:
-            (a,b) = self.states[self.current_interval]
+        while self.current_interval < len(self.lefts) and not found:
+            a = self.lefts[self.current_interval]
+            b = self.rights[a]
             if self.last_iterate == b:
                 self.current_interval += 1
             else:

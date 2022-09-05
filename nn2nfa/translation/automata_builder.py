@@ -162,8 +162,8 @@ def build_linear_eq_acc(weights: list, bias, leq: bool):
         ineq_automaton.add_edge(2, 2, (0,))
         ineq_automaton.add_edge(2, 2, (1,))
 
-    automaton = join_automata([n], lin_comb_automaton, ineq_automaton, project_tapes= True)
-    #automaton.project_onto_necessary_tapes()
+    automaton = join_automata([n], lin_comb_automaton, ineq_automaton)
+    automaton.project_onto_necessary_tapes()
     return automaton
 
 def build_signed_lin_comb_automaton(weights: list, bias, activation: str = 'relu'):

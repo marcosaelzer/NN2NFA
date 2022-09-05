@@ -2,6 +2,7 @@
 from collections import defaultdict
 from nn2nfa.translation.FatStateSet import FatStateSet, WorkList
 from functools import partial
+
 import time
 import numpy as np
 def nested_dict(n, type):
@@ -11,8 +12,23 @@ def nested_dict(n, type):
         return defaultdict(partial(nested_dict, n-1, type))
 
 
+"""
+Data structure representing an n-Sum Automaton with optional bias.
+We use a symbolic representation for the edges to save memory.
+An edge is a tuple (j, x) where j is the sum of all input bits w.r.t signs.
+(for example if the input is (1011) and we have signs (-1, -1, -1, 1) then j=-1)
+x represents the output bit.
+"""
 class SumAutomaton:
     def __init__(self, n, signs = None, res_sign = 0, bias = 0):
+        """
+        Constructor
+        Args:
+            n: number of tapes to sum
+            signs: list with length n, containing the signs of the tapes. Can be None if the input signs are not known, yet.
+            res_sign: sign of the result
+            bias: optional bias value for the sum
+        """
         self.n = n
         self.trans = dict()
         self.start_states = set()
@@ -27,6 +43,16 @@ class SumAutomaton:
         self.generate_sum_automaton()
 
     def generate_sum_automaton(self):
+        """
+        Generates the sum automaton as described in the paper.
+        States of the automaton respresent the current carry bit. Obviously state 0 is the final state. The start state is the bias value.
+        Then the automaton can be generated inductively, with the following definition:
+        for j in all possible bit sums:
+            p --(j,x)--> q iff x=(i+j) mod 2 and q = p+(j +/- x) div 2    (+/- depending on the result bit)
+
+        Returns:
+
+        """
         number_neg = 0
         number_pos = 0
         if self.signs is None:
@@ -97,6 +123,19 @@ class SumAutomaton:
         return False
 
     def get_input_tape_matching_successors(self, state, symbol, matching_tapes, sign_situation=None):
+        """
+        Helper method for the join operation. This method finds the successor of a given state (can only be one because SumAutomata are deterministic)
+        which match the given symbol on the tapes
+        on which the automata are joined
+        Args:
+            state:
+            symbol: the symbol to be matched
+            matching_tapes: tapes which have to be matched
+            sign_situation: Optional if the sign situation was not given at the time that the automaton was built
+
+        Returns:
+
+        """
         signs_to_use = self.signs
         if sign_situation is not None:
             signs_to_use = sign_situation
@@ -111,19 +150,27 @@ class SumAutomaton:
     def get_number_of_states(self):
         return len(self.trans.keys())
 
-
+"""
+Class for representing automata  
+"""
 class Automaton:
     def __init__(self):
         self.states: set = set()
+        # Transition are stored in a nested dictionary. We hold the successors as well as the predecessors for efficient
+        # access. This is especially useful for minimization
         self.successors: defaultdict = nested_dict(2, set)
         self.predecessors: defaultdict = nested_dict(2, set)
-        #self.edge_set: defaultdict = defaultdict(set)
+
+        # Information about the tapes of the automaton
+        # input_tapes, output_tapes are related to the input-output-like character of the automata
         self.tape_size: int = 0
+        self.input_tapes = set()
+        self.output_tapes = set()
+
         self.end_states: set = set()
         self.start_states: set = set()
         self.alphabet: set = set()
-        self.input_tapes = set()
-        self.output_tapes = set()
+
 
     def test(self, w) -> bool:
         """
@@ -155,6 +202,11 @@ class Automaton:
         return False
 
     def is_empty(self) -> bool:
+        """
+        Simple worklist algorithm to test emptiness of the automaton
+        Returns: True or False
+
+        """
         worklist: set = self.start_states.copy()
         marked: set = set()
         while len(worklist) != 0:
@@ -202,6 +254,11 @@ class Automaton:
         self.tape_size = old_tape_size - len(tapes)
 
     def project_onto_necessary_tapes(self):
+        """
+        Discard all tapes which are not input or ouput
+        Returns:
+
+        """
         tape_set = set(range(self.tape_size))
         survivor_set = self.input_tapes.union(self.output_tapes)
         tape_set = tape_set.difference(survivor_set)
@@ -226,19 +283,6 @@ class Automaton:
                         todo.append(q)
 
         return reachables
-
-    def __productives(self):
-        productives = set()
-
-        todo = list(self.end_states)
-        while todo:
-            q = todo.pop(0)
-            if not q in productives:
-                productives.add(q)
-                for a in self.alphabet:
-                    for p in self.get_predecessors(q, a):
-                        todo.append(p)
-        return productives
 
     def __shrink_to(self, survivors):
         # find new names for the survivors and rename them accordingly
@@ -271,43 +315,6 @@ class Automaton:
                 self.add_edge(new_names[p], new_names[q], a)
 
         return self
-
-    def __simulation_pairs(self):
-        # returns the set { (p,q) | p ~< q }
-        n = self.get_number_of_states()
-        fs = self.end_states
-        sim = {(p, q) for p in range(n) for q in range(n) if p != q and (p not in fs or q in fs)}
-        old_sim = set()
-        # turn sim into largest is-simulated-by relation by successively removing pairs (p,q) such that p is not simulated by q
-        while sim != old_sim:
-            old_sim = sim.copy()
-            for (p, q) in old_sim:
-                is_simulated = True
-                for a in self.alphabet:
-                    p_succs = self.get_successors(p, a)
-                    q_succs = self.get_successors(q, a)
-
-                    for s in p_succs:
-                        found_match = False
-                        for t in q_succs:
-                            if s == t or (s, t) in sim:
-                                found_match = True
-                                break
-
-                        if not found_match:
-                            is_simulated = False
-                            break
-                    if not is_simulated:
-                        break
-
-                if not is_simulated:
-                    sim.discard((p, q))
-        return sim
-
-    def simulation_equivalence_pairs(self):
-        # returns the set { (p,q) | p ~~ q and p < q }
-        simulated_by = self.__simulation_pairs()
-        return {(p, q) for (p, q) in simulated_by if p < q and (q, p) in simulated_by}
 
     def bisimulation_pairs(self):
         # returns the set { (p,q) | p ~ q and p < q }
@@ -475,47 +482,38 @@ class Automaton:
         return bisim
 
     def minimize(self):
-        states_before = self.get_number_of_states()
-        time_before = time.time()
-        # minimisation via some simulation-based equivalence quotienting
-        """if self.get_number_of_states() > 20000:
-            self.__shrink_to(self.__reachables())
-            return"""
+        """
+        Method for minimizin NFAs by some simulation-based equivalence quotienting.
+        There are two variants. The standard variant is a bit faster but uses a lot of memory. Therefore it is only used
+        for automata with up to 8000 states. The worklist variant is a bit slower but uses efficient data structures and
+        a lot less memory. This is useful for very big automata.
+
+        Returns:
+
+        """
+        # minimisation via
+
         # merge pairs of equivalent states, using smallest state as representative of equivalence class
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
-        """
-        if NFA.minimization_engine == NFA.SIMUEQ:
-            mergable = self.simulation_equivalence_pairs()
-        elif NFA.minimization_engine == NFA.BISIMU:
-            mergable = self.bisimulation_pairs()
-        """
-        #mergable = self.simulation_equivalence_pairs()
-        #mergable = self.bisimulation_pairs()
-
-        if self.get_number_of_states() < 8000:
+        if self.get_number_of_states() < 0:
+            # standard variant
             mergable = self.bisimulation_pairs()
             for (p, q) in mergable:
                 r = replacements[q]
                 if p < r:
                     replacements[q] = p
-            self.__merge_states(replacements)
+
         else:
+            # worklist variant
             mergable = self.bisimulation_pairs_worklist()
             for p in mergable.keys():
                 for q in mergable[p]:
                     r = replacements[q]
                     if p < r:
                         replacements[q] = p
-            self.__merge_states(replacements)
 
-
-        """
-        for (p,q) in mergable:
-            r = replacements[q]
-            if p < r:
-                replacements[q] = p
-        self.__merge_states(replacements)"""
+        self.__merge_states(replacements)
 
         # if s <=> t and s<t and t is initial, then s becomes initial now
         new_initials = {replacements[t] for t in self.start_states}
@@ -525,7 +523,6 @@ class Automaton:
 
         self.__shrink_to(self.__reachables())
 
-        #print(f'minimized from {states_before} to {self.get_number_of_states()} by {1-self.get_number_of_states()/states_before}% in {time.time()-time_before}s')
         return self
 
     """
@@ -544,11 +541,13 @@ class Automaton:
 
     def get_input_tape_matching_successors(self, p, a, tapes) -> set:
         """
+        Helper method for the join operation. This method finds all successors of a given state
+        such that the input tapes of this automaton match the to_matched_tapes of the given symbol
 
         Args:
-            p:
-            a:
-            *tapes:
+            p: state
+            a: symbol
+            *tapes: to-matched-tapes
 
         Returns:
 
@@ -567,10 +566,6 @@ class Automaton:
         return len(self.states)
 
     def get_predecessors(self, q, a):
-        predecessors = set()
-        """for s, _, w in self.graph.in_edges(q, keys=True):
-            if w == a:
-                predecessors.add(s)"""
         return self.predecessors[q][a]
 
     def add_edge(self, s: int, t: int, w: tuple):
@@ -589,17 +584,12 @@ class Automaton:
         self.alphabet.add(w)
         self.successors[s][w].add(t)
         self.predecessors[t][w].add(s)
-        #self.edge_set[s].add((s, t, w))
-
-        #self.graph.add_edge(s, t, w)
         self.alphabet.add(w)
 
     def reset(self):
-        #self.graph = nx.MultiDiGraph()
         self.states = set()
         self.predecessors = nested_dict(2, set)
         self.successors = nested_dict(2, set)
-        #self.edge_set = defaultdict(set)
         self.tape_size = 0
         self.start_states = set()
         self.end_states = set()
@@ -609,16 +599,8 @@ class Automaton:
         return {(p, q, a) for p in self.states for a in self.successors[p].keys() for q in self.successors[p][a]}
 
     def get_edges_from(self, state: int):
-        """
-        edge_set = set()
-        for s, t, w in self.graph.edges:
-            if s == state:
-                edge_set.add((t, w))
-        """
         sets = [(state, t, w) for w in self.successors[state].keys() for t in self.successors[state][w]]
-        #return set.union(*sets)
         return set(sets)
-        #return self.edge_set[state]
 
     def __clear_initials(self):
         self.start_states = set()

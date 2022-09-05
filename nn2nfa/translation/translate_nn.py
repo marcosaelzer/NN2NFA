@@ -79,8 +79,8 @@ def build_nn_automaton(nn: ToyNNetwork, properties: OutReachProperty = None):
         current_automaton = build_input_properties(nn.input_size)
     for i in range(nn.get_layer_count()):
         neuron_automata = build_neuron_automata_parallel(nn, current_automaton, i)
-        print(f'Building layer {i}: merging: {[a.get_number_of_states() for a in neuron_automata]}')
         current_automaton = build_layer_automaton(neuron_automata)
+        print(f'Built layer {i}: with: {current_automaton.get_number_of_states()} states')
     #print('Finished building now minimizing')
     #current_automaton.minimize()
     return current_automaton
