@@ -44,11 +44,10 @@ def join_automata(onInputTapes:list, automaton1: Automaton, automaton2: Automato
             matches = automaton2.get_input_tape_matching_successors(t, x, onInputTapes)
             for v, y in matches:
                 # remove input tapes from y
-                new_y = y
+                new_y = list(y)
                 for tape in sorted(automaton2.input_tapes, reverse=True):
-                    y_list = list(new_y)
-                    del y_list[tape]
-                    new_y = "".join(y_list)
+                    del new_y[tape]
+                new_y = tuple(new_y)
 
                 if (u, v) not in already_worked:
                     worklist.add((u, v))
@@ -58,7 +57,7 @@ def join_automata(onInputTapes:list, automaton1: Automaton, automaton2: Automato
                 if not project_tapes:
                     joined_automaton.add_edge(product_states[(s, t)], product_states[(u,v)], x+new_y)
                 else:
-                    joined_automaton.add_edge(product_states[(s, t)], product_states[(u, v)], remove_joined_tapes_from_word(x, onInputTapes) + new_y)
+                    joined_automaton.add_edge(product_states[(s, t)], product_states[(u, v)], (*remove_joined_tapes_from_word(x, onInputTapes), *new_y))
     joined_automaton.input_tapes = automaton1.input_tapes
     if not project_tapes:
         joined_automaton.tape_size = automaton1.tape_size + automaton2.tape_size - len(onInputTapes)
@@ -117,7 +116,7 @@ def join_pos_input_multiplier_with_sum(onInputTapes: list, automaton1: Automaton
                         if (u, next, idle_state) not in product_states.keys():
                             product_states[(u, next, idle_state)] = state_counter
                             state_counter += 1
-                        joined_automaton.add_edge(i, product_states[(u, next, idle_state)], remove_joined_tapes_from_word(x, onInputTapes) + str('0'))
+                        joined_automaton.add_edge(i, product_states[(u, next, idle_state)], (*remove_joined_tapes_from_word(x, onInputTapes), 0))
 
                     # Case result of sum is negative
                     for next in neg_sum.start_states:
@@ -127,9 +126,9 @@ def join_pos_input_multiplier_with_sum(onInputTapes: list, automaton1: Automaton
                             product_states[(u, idle_state, next)] = state_counter
                             state_counter += 1
                         if activation == "relu":
-                            joined_automaton.add_edge(i, product_states[(u, idle_state, next)], remove_joined_tapes_from_word(x, onInputTapes) + str('0'))
+                            joined_automaton.add_edge(i, product_states[(u, idle_state, next)], (*remove_joined_tapes_from_word(x, onInputTapes), 0))
                         else:
-                            joined_automaton.add_edge(i, product_states[(u, idle_state, next)], remove_joined_tapes_from_word(x, onInputTapes) + str('1'))
+                            joined_automaton.add_edge(i, product_states[(u, idle_state, next)], (*remove_joined_tapes_from_word(x, onInputTapes), 1))
                     continue
                 else:
                     continue
@@ -152,7 +151,7 @@ def join_pos_input_multiplier_with_sum(onInputTapes: list, automaton1: Automaton
             if next not in product_states.keys():
                 product_states[next] = state_counter
                 state_counter += 1
-            joined_automaton.add_edge(i, product_states[next], remove_joined_tapes_from_word(x, onInputTapes) + str(res_bit))
+            joined_automaton.add_edge(i, product_states[next], (*remove_joined_tapes_from_word(x, onInputTapes), res_bit))
 
     joined_automaton.input_tapes = automaton1.input_tapes
     joined_automaton.tape_size = automaton1.tape_size - len(onInputTapes) + 1
@@ -197,7 +196,7 @@ def join_multiplier_sum(onInputTapes: list, automaton1: Automaton, pos_sum: SumA
                 only_pos_check = True
                 only_neg_check = True
                 for index in onInputTapes:
-                    if x[index] == "0":
+                    if x[index] == 0:
                         signs.append(0)
                         only_neg_check = False
                     else:
@@ -214,7 +213,7 @@ def join_multiplier_sum(onInputTapes: list, automaton1: Automaton, pos_sum: SumA
                         if new_state not in product_states.keys():
                             product_states[new_state] = state_counter
                             state_counter += 1
-                        joined_automaton.add_edge(i, product_states[new_state], remove_joined_tapes_from_word(x, onInputTapes) + str('0'))
+                        joined_automaton.add_edge(i, product_states[new_state], (*remove_joined_tapes_from_word(x, onInputTapes), 0))
 
                 # Case result of sum is negative
                 if not only_pos_check:
@@ -226,9 +225,9 @@ def join_multiplier_sum(onInputTapes: list, automaton1: Automaton, pos_sum: SumA
                             product_states[new_state] = state_counter
                             state_counter += 1
                         if acitvation == "relu":
-                            joined_automaton.add_edge(i, product_states[new_state], remove_joined_tapes_from_word(x, onInputTapes) + str('0'))
+                            joined_automaton.add_edge(i, product_states[new_state], (*remove_joined_tapes_from_word(x, onInputTapes), 0))
                         else:
-                            joined_automaton.add_edge(i, product_states[new_state], remove_joined_tapes_from_word(x, onInputTapes) + str('1'))
+                            joined_automaton.add_edge(i, product_states[new_state], (*remove_joined_tapes_from_word(x, onInputTapes), 1))
                 continue
             else:
                 if t_ == idle_state:
@@ -249,7 +248,7 @@ def join_multiplier_sum(onInputTapes: list, automaton1: Automaton, pos_sum: SumA
             if next not in product_states.keys():
                 product_states[next] = state_counter
                 state_counter += 1
-            joined_automaton.add_edge(i, product_states[next], remove_joined_tapes_from_word(x, onInputTapes) + str(res_bit))
+            joined_automaton.add_edge(i, product_states[next], (*remove_joined_tapes_from_word(x, onInputTapes), res_bit))
 
     joined_automaton.input_tapes = automaton1.input_tapes
     joined_automaton.tape_size = automaton1.tape_size - len(onInputTapes) + 1
@@ -257,9 +256,9 @@ def join_multiplier_sum(onInputTapes: list, automaton1: Automaton, pos_sum: SumA
 
     return joined_automaton
 
-def remove_joined_tapes_from_word(x: str, joined_tapes: list):
+def remove_joined_tapes_from_word(x: tuple, joined_tapes: list):
     new = []
     for i in range(len(x)):
         if i not in joined_tapes:
             new.append(x[i])
-    return "".join(new)
+    return tuple(new)

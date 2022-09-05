@@ -12,18 +12,18 @@ def build_bruse_multiplier(c: int) -> Automaton:
     mult_automaton.output_tapes = {1}
 
     if c == 0:
-        mult_automaton.add_edge(0, 0, "10")
-        mult_automaton.add_edge(0, 0, "00")
+        mult_automaton.add_edge(0, 0, (1,0))
+        mult_automaton.add_edge(0, 0, (0,0))
         return mult_automaton
 
     for k in range(c):
         x = 1 if (k+c) % 2 == 1 else 0
         next = math.floor((k+c)/2)
-        mult_automaton.add_edge(k, next, f"1{x}")
+        mult_automaton.add_edge(k, next, (1, x))
 
         x = 1 if k % 2 == 1 else 0
         next = math.floor(k/2)
-        mult_automaton.add_edge(k, next, f"0{x}")
+        mult_automaton.add_edge(k, next, (0,x))
 
     return mult_automaton
 
@@ -36,19 +36,19 @@ def build_signed_multiplier(c: int) -> Automaton:
     if c != 0:
         mult_automaton.end_states.add(mult_0_state)
         if c < 0:
-            mult_automaton.add_edge(new_state, 0, "01")
-            mult_automaton.add_edge(new_state, 0, "10")
-            mult_automaton.add_edge(new_state, mult_0_state, "00")
+            mult_automaton.add_edge(new_state, 0, (0,1))
+            mult_automaton.add_edge(new_state, 0, (1,0))
+            mult_automaton.add_edge(new_state, mult_0_state, (0,0))
 
         elif c > 0:
-            mult_automaton.add_edge(new_state, 0, "00")
-            mult_automaton.add_edge(new_state, 0, "11")
+            mult_automaton.add_edge(new_state, 0, (0,0))
+            mult_automaton.add_edge(new_state, 0, (1,1))
 
-        mult_automaton.add_edge(mult_0_state, mult_0_state, "00")
+        mult_automaton.add_edge(mult_0_state, mult_0_state, (0,0))
 
     else:
-        mult_automaton.add_edge(new_state, 0, "00")
-        mult_automaton.add_edge(new_state, 0, "10")
+        mult_automaton.add_edge(new_state, 0, (0,0))
+        mult_automaton.add_edge(new_state, 0, (1,0))
 
     return mult_automaton
 
@@ -62,15 +62,15 @@ def build_pos_input_multiplier(c: int) -> Automaton:
     if c != 0:
         mult_automaton.end_states.add(mult_0_state)
         if c < 0:
-            mult_automaton.add_edge(new_state, 0, "01")
-            mult_automaton.add_edge(new_state, mult_0_state, "00")
+            mult_automaton.add_edge(new_state, 0, (0,1))
+            mult_automaton.add_edge(new_state, mult_0_state, (0,0))
 
         elif c > 0:
-            mult_automaton.add_edge(new_state, 0, "00")
+            mult_automaton.add_edge(new_state, 0, (0,0))
 
-        mult_automaton.add_edge(mult_0_state, mult_0_state, "00")
+        mult_automaton.add_edge(mult_0_state, mult_0_state, (0,0))
     else:
-        mult_automaton.add_edge(new_state, 0, "00")
+        mult_automaton.add_edge(new_state, 0, (0,0))
 
     return mult_automaton
 
@@ -86,7 +86,7 @@ def build_pos_input_n_multiplier(weights: list) -> Automaton:
 
     for i in range((2 ** (n))):
         b = bin(i).split('b')[1].zfill(n)
-        automaton.add_edge(0, 0, b)
+        automaton.add_edge(0, 0, tuple(list([int(j) for j in b])))
 
     automaton = join_automata([0], automaton, build_pos_input_multiplier(weights[0]))
     current_weight_index = 1
@@ -108,16 +108,18 @@ def build_signed_n_multiplier(weights: list) -> Automaton:
     automaton.start_states = {0}
     automaton.end_states = {0}
 
-    for i in range((2 ** (n))):
+    for i in range((2 ** n)):
         b = bin(i).split('b')[1].zfill(n)
-        automaton.add_edge(0, 0, b)
+        automaton.add_edge(0, 0, tuple([int(j) for j in b]))
 
     automaton = join_automata([0], automaton, build_signed_multiplier(weights[0]))
+
     current_weight_index = 1
     while current_weight_index < n:
         automaton = join_automata([current_weight_index], automaton, build_signed_multiplier(weights[current_weight_index]))
         #automaton.minimize()
         current_weight_index += 1
+
     automaton.minimize()
     for i in range(n):
         automaton.output_tapes.add(n+i)
@@ -149,16 +151,16 @@ def build_linear_eq_acc(weights: list, bias, leq: bool):
     ineq_automaton.input_tapes = {0}
     if not leq:
         ineq_automaton.end_states = {1}
-        ineq_automaton.add_edge(0, 1, "0")
-        ineq_automaton.add_edge(1, 1, "0")
-        ineq_automaton.add_edge(1, 1, "1")
+        ineq_automaton.add_edge(0, 1, (0,))
+        ineq_automaton.add_edge(1, 1, (0,))
+        ineq_automaton.add_edge(1, 1, (1,))
     else:
         ineq_automaton.end_states = {1, 2}
-        ineq_automaton.add_edge(0, 1, "0")
-        ineq_automaton.add_edge(1, 1, "0")
-        ineq_automaton.add_edge(0, 2, "1")
-        ineq_automaton.add_edge(2, 2, "0")
-        ineq_automaton.add_edge(2, 2, "1")
+        ineq_automaton.add_edge(0, 1, (0,))
+        ineq_automaton.add_edge(1, 1, (0,))
+        ineq_automaton.add_edge(0, 2, (1,))
+        ineq_automaton.add_edge(2, 2, (0,))
+        ineq_automaton.add_edge(2, 2, (1,))
 
     automaton = join_automata([n], lin_comb_automaton, ineq_automaton, project_tapes= True)
     #automaton.project_onto_necessary_tapes()
@@ -172,6 +174,7 @@ def build_signed_lin_comb_automaton(weights: list, bias, activation: str = 'relu
 
     res_automaton = join_multiplier_sum(list({i for i in range(multiplier.tape_size)}.difference(multiplier.input_tapes)),
                                       multiplier, pos_adder, neg_adder, activation)
+
     res_automaton.minimize()
     return res_automaton
 

@@ -3,6 +3,7 @@ from collections import defaultdict
 from nn2nfa.translation.FatStateSet import FatStateSet, WorkList
 from functools import partial
 import time
+import numpy as np
 def nested_dict(n, type):
     if n == 1:
         return defaultdict(type)
@@ -116,6 +117,7 @@ class Automaton:
         self.states: set = set()
         self.successors: defaultdict = nested_dict(2, set)
         self.predecessors: defaultdict = nested_dict(2, set)
+        #self.edge_set: defaultdict = defaultdict(set)
         self.tape_size: int = 0
         self.end_states: set = set()
         self.start_states: set = set()
@@ -185,16 +187,15 @@ class Automaton:
             for w in old_graph_successors[s].keys():
                 for t in old_graph_successors[s][w]:
                 #for w in old_graph[s][t].keys():
-                    new_w = w
+                    new_w = list(w)
                     for tape in sorted(tapes, reverse=True):
-                        w_list = list(new_w)
-                        del w_list[tape]
-                        new_w = "".join(w_list)
+                        del new_w[tape]
                         if tape in self.input_tapes:
                             self.input_tapes.remove(tape)
                         if tape in self.output_tapes:
                             self.output_tapes.remove(tape)
-                    self.add_edge(s, t, new_w)
+
+                    self.add_edge(s, t, tuple(new_w))
 
         self.start_states = old_start_states
         self.end_states = old_end_states
@@ -477,8 +478,9 @@ class Automaton:
         states_before = self.get_number_of_states()
         time_before = time.time()
         # minimisation via some simulation-based equivalence quotienting
-        if self.get_number_of_states() > 10000:
-            return
+        """if self.get_number_of_states() > 20000:
+            self.__shrink_to(self.__reachables())
+            return"""
         # merge pairs of equivalent states, using smallest state as representative of equivalence class
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
@@ -489,21 +491,31 @@ class Automaton:
             mergable = self.bisimulation_pairs()
         """
         #mergable = self.simulation_equivalence_pairs()
-        mergable = self.bisimulation_pairs()
-        #mergable = self.bisimulation_pairs_worklist()
-        """
-        for p in mergable.keys():
-            for q in mergable[p]:
+        #mergable = self.bisimulation_pairs()
+
+        if self.get_number_of_states() < 8000:
+            mergable = self.bisimulation_pairs()
+            for (p, q) in mergable:
                 r = replacements[q]
                 if p < r:
                     replacements[q] = p
-        self.__merge_states(replacements)
+            self.__merge_states(replacements)
+        else:
+            mergable = self.bisimulation_pairs_worklist()
+            for p in mergable.keys():
+                for q in mergable[p]:
+                    r = replacements[q]
+                    if p < r:
+                        replacements[q] = p
+            self.__merge_states(replacements)
+
+
         """
         for (p,q) in mergable:
             r = replacements[q]
             if p < r:
                 replacements[q] = p
-        self.__merge_states(replacements)
+        self.__merge_states(replacements)"""
 
         # if s <=> t and s<t and t is initial, then s becomes initial now
         new_initials = {replacements[t] for t in self.start_states}
@@ -561,7 +573,7 @@ class Automaton:
                 predecessors.add(s)"""
         return self.predecessors[q][a]
 
-    def add_edge(self, s: int, t: int, w: str):
+    def add_edge(self, s: int, t: int, w: tuple):
         """
         Adds an edge to our automaton
         Args:
@@ -577,6 +589,7 @@ class Automaton:
         self.alphabet.add(w)
         self.successors[s][w].add(t)
         self.predecessors[t][w].add(s)
+        #self.edge_set[s].add((s, t, w))
 
         #self.graph.add_edge(s, t, w)
         self.alphabet.add(w)
@@ -586,6 +599,7 @@ class Automaton:
         self.states = set()
         self.predecessors = nested_dict(2, set)
         self.successors = nested_dict(2, set)
+        #self.edge_set = defaultdict(set)
         self.tape_size = 0
         self.start_states = set()
         self.end_states = set()
@@ -601,9 +615,10 @@ class Automaton:
             if s == state:
                 edge_set.add((t, w))
         """
-        sets = [{(state, t, w) for t in self.successors[state][w]} for w in self.successors[state].keys()]
-        return set.union(*sets)
-
+        sets = [(state, t, w) for w in self.successors[state].keys() for t in self.successors[state][w]]
+        #return set.union(*sets)
+        return set(sets)
+        #return self.edge_set[state]
 
     def __clear_initials(self):
         self.start_states = set()

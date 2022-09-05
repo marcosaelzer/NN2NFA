@@ -7,8 +7,8 @@ import multiprocessing as mp
 
 def build_neuron_automata_parallel(nn: ToyNNetwork, prev_layer_automaton, layer_index) -> list:
 
-    pool = mp.Pool(mp.cpu_count())
-    #pool = mp.Pool(1)
+    """ #pool = mp.Pool(mp.cpu_count())
+    pool = mp.Pool(1)
 
     automata = [pool.apply(build_neuron_automaton, args=(prev_layer_automaton,
                                                          nn.get_neuron_weights(layer_index, i),
@@ -18,6 +18,12 @@ def build_neuron_automata_parallel(nn: ToyNNetwork, prev_layer_automaton, layer_
                 for i in range(nn.get_neuron_count(layer_index))]
     pool.close()
     return [element[0] for element in sorted(automata, key=lambda tup: tup[1])]
+"""
+    return [build_neuron_automaton(prev_layer_automaton,
+                                                         nn.get_neuron_weights(layer_index, i),
+                                                         nn.get_neuron_bias(layer_index, i),
+                                                         nn.get_neuron_activation(layer_index, i),
+                                                         i, layer_index) for i in range(nn.get_neuron_count(layer_index))]
 
 
 def build_neuron_automaton(prev_layer_automaton: Automaton, weights, bias, activation, i, layer_index):
@@ -36,7 +42,7 @@ def build_neuron_automaton(prev_layer_automaton: Automaton, weights, bias, activ
     neuron_automaton.minimize()
     #print(neuron_automaton)
     #print(neuron_automaton.is_deterministic())
-    return (neuron_automaton, i)
+    return neuron_automaton
 
 
 def build_layer_automaton(neuron_automata: list) -> Automaton:
@@ -59,11 +65,10 @@ def build_input_properties(input_size):
     automaton.output_tapes = {i for i in range(input_size)}
     automaton.start_states = {0}
     automaton.end_states = {0}
-    for i in range((2 ** (input_size))):
+    for i in range((2 ** input_size)):
         b = bin(i).split('b')[1].zfill(input_size)
-        automaton.add_edge(0, 0, b)
+        automaton.add_edge(0, 0, tuple(list([int(j) for j in b])))
     #print('Input Automaton')
-    #print(automaton)
     return automaton
 
 def build_output_properties():
@@ -74,6 +79,7 @@ def build_nn_automaton(nn: ToyNNetwork, properties: OutReachProperty = None):
         current_automaton = build_input_properties(nn.input_size)
     for i in range(nn.get_layer_count()):
         neuron_automata = build_neuron_automata_parallel(nn, current_automaton, i)
+        print(f'Building layer {i}: merging: {[a.get_number_of_states() for a in neuron_automata]}')
         current_automaton = build_layer_automaton(neuron_automata)
     #print('Finished building now minimizing')
     #current_automaton.minimize()

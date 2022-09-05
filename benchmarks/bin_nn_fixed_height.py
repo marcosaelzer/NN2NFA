@@ -9,7 +9,7 @@ from nn2nfa.nn_model.toy_nnet import generate_from_file, ToyNNetwork
 
 def generate_nn(inputs, outputs, fixed_height):
     files = []
-    for n in range(1, 8):
+    for n in range(1, 15):
         filename = f'nn_fixed_height_{fixed_height}_{n}.toynnet'
         f = open(filename, 'w')
         files.append(filename)
@@ -81,11 +81,11 @@ def test_on_random_inputs(nn: ToyNNetwork, automaton):
             w_list = []
             for w in test_list:
                 w_list.append(w[j])
-            test_w.append("".join(w_list))
+            test_w.append(tuple([int(k) for k in w_list]))
 
         acc = False
         for i in range(50):
-            test_w.append("".join(["0" for _ in range(nn.input_size+nn.output_size)]))
+            test_w.append(tuple([0 for _ in range(nn.input_size+nn.output_size)]))
             if automaton.test(test_w):
                 acc = True
                 break
@@ -117,6 +117,7 @@ def do_benchmarks(files):
         nodes.append(automaton.get_number_of_states())
         edges.append(automaton.get_number_of_edges())
         build_time.append(res_time)
+        print('#############')
 
     print(n)
     print(nodes)
