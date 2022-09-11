@@ -6,10 +6,11 @@ import math
 from nn2nfa.translation.automata import Automaton
 from nn2nfa.translation.translate_nn import build_nn_automaton
 from nn2nfa.nn_model.toy_nnet import generate_from_file, ToyNNetwork
+from nn2nfa.out_reach_properties.out_reach_property import OutReachProperty, Inequality
 
 def generate_nn(inputs, outputs, fixed_height):
     files = []
-    for n in range(1, 15):
+    for n in range(1, 10):
         filename = f'nn_fixed_height_{fixed_height}_{n}.toynnet'
         f = open(filename, 'w')
         files.append(filename)
@@ -105,10 +106,11 @@ def do_benchmarks(files):
     edges = []
     build_time = []
     for file in files:
+        props = OutReachProperty([Inequality([1], 10, True)], [Inequality([1], 10, False)])
         nn = generate_from_file(file)
         print(f'Translating {file}')
         start = time.time()
-        automaton = build_nn_automaton(nn, None)
+        automaton = build_nn_automaton(nn, props)
         end = time.time()
         res_time = end-start
         print(f'Built in {res_time} s')

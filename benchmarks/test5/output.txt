@@ -1,0 +1,7 @@
+fixed_height with input specs 
+Input 1 output 1 2 neurons
+
+    n= [1, 2, 3, 4, 5, 6]
+    nodes=[23, 112, 97, 23, 53, 663]
+    edges=[32, 361, 199, 85, 266, 18950]
+    build_time = [0.01, 0.42 ,2, 91, 514, 526]

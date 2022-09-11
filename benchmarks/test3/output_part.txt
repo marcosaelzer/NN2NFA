@@ -1,0 +1,226 @@
+/Users/eric/Desktop/Studium/Veröffentlichungen/NN2NFA/venv/bin/python /Users/eric/Desktop/Studium/Veröffentlichungen/NN2NFA/benchmarks/bin_nn_fixed_width.py 
+Translating nn_fixed_width_3_1.toynnet
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Built layer 0: with: 3 states
+Minimizing automaton with 3 states and 5 edges
+Minimizing automaton with 6 states and 14 edges
+Built layer 1: with: 4 states
+Minimizing automaton with 2 states and 3 edges
+Minimizing automaton with 7 states and 18 edges
+Built layer 2: with: 6 states
+Minimizing automaton with 3 states and 5 edges
+Minimizing automaton with 11 states and 28 edges
+Built layer 3: with: 6 states
+Minimizing automaton with 2 states and 3 edges
+Minimizing automaton with 11 states and 28 edges
+Built layer 4: with: 6 states
+Built in 0.0025157928466796875 s
+6 states and 14 edges
+test check: True
+#############
+Translating nn_fixed_width_3_2.toynnet
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 2 states and 4 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Built layer 0: with: 3 states
+Minimizing automaton with 2 states and 5 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 3 states and 8 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 15 states and 36 edges
+Built layer 1: with: 13 states
+Minimizing automaton with 3 states and 8 edges
+Minimizing automaton with 28 states and 70 edges
+Minimizing automaton with 3 states and 8 edges
+Minimizing automaton with 28 states and 70 edges
+Minimizing automaton with 59 states and 148 edges
+Built layer 2: with: 37 states
+Minimizing automaton with 3 states and 8 edges
+Minimizing automaton with 92 states and 222 edges
+Minimizing automaton with 3 states and 8 edges
+Minimizing automaton with 92 states and 222 edges
+Minimizing automaton with 191 states and 452 edges
+Built layer 3: with: 149 states
+Minimizing automaton with 2 states and 5 edges
+Minimizing automaton with 440 states and 982 edges
+Built layer 4: with: 62 states
+Built in 0.7178640365600586 s
+62 states and 142 edges
+test check: True
+#############
+Translating nn_fixed_width_3_3.toynnet
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 2 states and 4 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Built layer 0: with: 3 states
+Minimizing automaton with 5 states and 22 edges
+Minimizing automaton with 9 states and 20 edges
+Minimizing automaton with 5 states and 22 edges
+Minimizing automaton with 9 states and 20 edges
+Minimizing automaton with 3 states and 14 edges
+Minimizing automaton with 6 states and 14 edges
+Minimizing automaton with 21 states and 48 edges
+Minimizing automaton with 27 states and 64 edges
+Built layer 1: with: 27 states
+Minimizing automaton with 5 states and 22 edges
+Minimizing automaton with 58 states and 138 edges
+Minimizing automaton with 2 states and 9 edges
+Minimizing automaton with 71 states and 164 edges
+Minimizing automaton with 3 states and 14 edges
+Minimizing automaton with 58 states and 138 edges
+Minimizing automaton with 113 states and 260 edges
+Minimizing automaton with 423 states and 969 edges
+Built layer 2: with: 308 states
+Minimizing automaton with 2 states and 9 edges
+Minimizing automaton with 799 states and 1782 edges
+Minimizing automaton with 5 states and 22 edges
+Minimizing automaton with 753 states and 1690 edges
+Minimizing automaton with 9 states and 35 edges
+Minimizing automaton with 799 states and 1782 edges
+Minimizing automaton with 974 states and 2131 edges
+Minimizing automaton with 10179 states and 21867 edges
+Built layer 3: with: 15 states
+Minimizing automaton with 3 states and 14 edges
+Minimizing automaton with 36 states and 127 edges
+Built layer 4: with: 14 states
+Built in 376.27789306640625 s
+14 states and 41 edges
+test check: True
+#############
+Translating nn_fixed_width_3_4.toynnet
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 2 states and 4 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Built layer 0: with: 3 states
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 9 states and 62 edges
+Minimizing automaton with 7 states and 16 edges
+Minimizing automaton with 15 states and 36 edges
+Minimizing automaton with 31 states and 76 edges
+Minimizing automaton with 59 states and 148 edges
+Built layer 1: with: 59 states
+Minimizing automaton with 17 states and 97 edges
+Minimizing automaton with 135 states and 332 edges
+Minimizing automaton with 9 states and 62 edges
+Minimizing automaton with 134 states and 330 edges
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 134 states and 330 edges
+Minimizing automaton with 3 states and 26 edges
+Minimizing automaton with 134 states and 330 edges
+Minimizing automaton with 158 states and 386 edges
+Minimizing automaton with 806 states and 1922 edges
+Minimizing automaton with 4754 states and 11018 edges
+Built layer 2: with: 46 states
+Minimizing automaton with 3 states and 26 edges
+Minimizing automaton with 104 states and 594 edges
+Minimizing automaton with 3 states and 26 edges
+Minimizing automaton with 104 states and 594 edges
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 104 states and 594 edges
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 104 states and 594 edges
+Minimizing automaton with 41 states and 134 edges
+Minimizing automaton with 106 states and 386 edges
+Minimizing automaton with 239 states and 972 edges
+Built layer 3: with: 81 states
+Minimizing automaton with 5 states and 40 edges
+Minimizing automaton with 207 states and 900 edges
+Built layer 4: with: 12 states
+Built in 123.75638604164124 s
+12 states and 38 edges
+test check: True
+#############
+Translating nn_fixed_width_3_5.toynnet
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 2 states and 4 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 4 states and 8 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Minimizing automaton with 3 states and 6 edges
+Built layer 0: with: 3 states
+Minimizing automaton with 17 states and 178 edges
+Minimizing automaton with 13 states and 28 edges
+Minimizing automaton with 9 states and 116 edges
+Minimizing automaton with 9 states and 20 edges
+Minimizing automaton with 3 states and 50 edges
+Minimizing automaton with 13 states and 28 edges
+Minimizing automaton with 5 states and 76 edges
+Minimizing automaton with 6 states and 14 edges
+Minimizing automaton with 33 states and 275 edges
+Minimizing automaton with 13 states and 28 edges
+Minimizing automaton with 27 states and 60 edges
+Minimizing automaton with 59 states and 132 edges
+Minimizing automaton with 73 states and 168 edges
+Minimizing automaton with 165 states and 376 edges
+Built layer 1: with: 155 states
+Minimizing automaton with 9 states and 116 edges
+Minimizing automaton with 479 states and 1052 edges
+Minimizing automaton with 2 states and 33 edges
+Minimizing automaton with 391 states and 876 edges
+Minimizing automaton with 17 states and 178 edges
+Minimizing automaton with 367 states and 828 edges
+Minimizing automaton with 3 states and 50 edges
+Minimizing automaton with 364 states and 822 edges
+Minimizing automaton with 5 states and 76 edges
+Minimizing automaton with 479 states and 1052 edges
+Minimizing automaton with 894 states and 1900 edges
+Minimizing automaton with 8320 states and 17482 edges
+Minimizing automaton with 463 states and 5894 edges
+Minimizing automaton with 3093 states and 38479 edges
+Built layer 2: with: 71 states
+Minimizing automaton with 9 states and 116 edges
+Minimizing automaton with 239 states and 1204 edges
+Minimizing automaton with 9 states and 116 edges
+Minimizing automaton with 224 states and 1170 edges
+Minimizing automaton with 17 states and 178 edges
+Minimizing automaton with 225 states and 1172 edges
+Minimizing automaton with 5 states and 76 edges
+Minimizing automaton with 214 states and 1124 edges
+Minimizing automaton with 9 states and 116 edges
+Minimizing automaton with 232 states and 1190 edges
+Minimizing automaton with 3878 states and 58331 edges
+Minimizing automaton with 39836 states and 1891443 edges

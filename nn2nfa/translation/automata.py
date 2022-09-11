@@ -3,6 +3,7 @@ from collections import defaultdict
 from nn2nfa.translation.FatStateSet import FatStateSet, WorkList
 from functools import partial
 
+
 import time
 import numpy as np
 def nested_dict(n, type):
@@ -491,12 +492,10 @@ class Automaton:
         Returns:
 
         """
-        # minimisation via
-
-        # merge pairs of equivalent states, using smallest state as representative of equivalence class
+        print(f'Minimizing automaton with {self.get_meta()}')
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
-        if self.get_number_of_states() < 0:
+        if self.get_number_of_states() < 3000:
             # standard variant
             mergable = self.bisimulation_pairs()
             for (p, q) in mergable:
@@ -522,7 +521,7 @@ class Automaton:
             self.__make_initial(s)
 
         self.__shrink_to(self.__reachables())
-
+        print(f'Minimiert zu: {self.get_meta()}')
         return self
 
     """

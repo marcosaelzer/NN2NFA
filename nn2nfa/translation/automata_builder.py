@@ -149,6 +149,7 @@ def build_linear_eq_acc(weights: list, bias, leq: bool):
     ineq_automaton.start_states = {0}
     ineq_automaton.tape_size = 1
     ineq_automaton.input_tapes = {0}
+
     if not leq:
         ineq_automaton.end_states = {1}
         ineq_automaton.add_edge(0, 1, (0,))
@@ -163,6 +164,8 @@ def build_linear_eq_acc(weights: list, bias, leq: bool):
         ineq_automaton.add_edge(2, 2, (1,))
 
     automaton = join_automata([n], lin_comb_automaton, ineq_automaton)
+    automaton.input_tapes = {i for i in range(n)}
+    automaton.output_tapes = {}
     automaton.project_onto_necessary_tapes()
     return automaton
 

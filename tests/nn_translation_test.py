@@ -3,7 +3,7 @@ from nn2nfa.nn_model.toy_nnet import generate_from_file, ToyNNetwork
 from benchmarks.bin_nn_fixed_height import test_on_random_inputs
 
 if __name__ == '__main__':
-    toynnet: ToyNNetwork = generate_from_file("../assets/nn_2n_minimal_example1.toynnet")
+    toynnet: ToyNNetwork = generate_from_file("../benchmarks/nn_fixed_width_1_2.toynnet")
     print(toynnet)
 
     a = build_nn_automaton(toynnet)
