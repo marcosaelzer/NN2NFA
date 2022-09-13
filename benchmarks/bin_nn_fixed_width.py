@@ -6,10 +6,12 @@ import math
 from nn2nfa.translation.automata import Automaton
 from nn2nfa.translation.translate_nn import build_nn_automaton
 from nn2nfa.nn_model.toy_nnet import generate_from_file, ToyNNetwork
-
-def generate_nn(inputs, outputs, fixed_width):
+"""
+Test script for generating and translating neural networks where each hidden layer has a fixed number of neurons
+"""
+def generate_nn(inputs, outputs, fixed_width, hidden_layers):
     files = []
-    for n in range(1, 10):
+    for n in range(1, hidden_layers+1):
         filename = f'nn_fixed_width_{fixed_width}_{n}.toynnet'
         f = open(filename, 'w')
         files.append(filename)
@@ -121,28 +123,29 @@ def do_benchmarks(files):
 
     print(n)
     print(nodes)
-    fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(n, nodes)
-    axs[0, 0].set_title('Nodes')
-    axs[0, 1].plot(n, edges, 'tab:orange')
-    axs[0, 1].set_title('Edges')
-    axs[1, 0].plot(n, build_time, 'tab:green')
-    axs[1, 0].set_title('Built time')
-    axs[1, 1].plot(n, nodes, 'tab:red')
-    axs[1, 1].set_title('Axis [1, 1]')
+    print(edges)
+    print(build_time)
+    fig, ax = plt.subplots()
+    plt.title('Fixed amount of hidden layers')
+    ax.set(xlabel='neurons per hidden layer', ylabel='')
+    ax.set(ylabel='nodes and sec')
+    ax.plot(n, nodes)
+    ax.plot(n, build_time, 'tab:green')
 
-    for ax in axs.flat:
-        ax.set(xlabel='x-label', ylabel='y-label')
-
+    ax2 = ax.twinx()
+    ax2.set(ylabel='edges')
+    ax2.plot(n, edges, 'tab:orange')
     # Hide x labels and tick labels for top plots and y ticks for right plots.
+    """
     for ax in axs.flat:
         ax.label_outer()
-
+    """
+    fig.tight_layout()
     plt.show()
 
 
 
 
 if __name__ == '__main__':
-    files = generate_nn(2, 2, 1)
+    files = generate_nn(2, 2, 1, 8)
     do_benchmarks(files)

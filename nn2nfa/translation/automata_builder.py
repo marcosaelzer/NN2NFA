@@ -181,3 +181,9 @@ def build_signed_lin_comb_automaton(weights: list, bias, activation: str = 'relu
     res_automaton.minimize()
     return res_automaton
 
+
+a = build_signed_lin_comb_automaton([-1, 1], -1)
+print(a.get_meta())
+print(a)
+
+print()
