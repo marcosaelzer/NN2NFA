@@ -230,3 +230,23 @@ def generate_from_file(filepath):
 
     return ToyNNetwork(network_generator.network_input_size, network_generator.network_weights,
                        network_generator.network_bias, network_generator.network_activations)
+
+def write_to_file(toynnet: ToyNNetwork, filepath: str):
+    """Writes a ToyNNet in the .toynnet format.
+
+    Args:
+        filepath: Path to file where toynnet should be written
+    """
+
+    file = open(filepath, 'w')
+    input_str = f"input_size={toynnet.input_size}\n"
+    network_str = ""
+    for layer_weights, layer_bias, layer_activations in zip(toynnet.weights,toynnet.bias, toynnet.activations):
+        layer_str = ""
+        for neuron_weights, neuron_bias, neuron_activation in zip(layer_weights, layer_bias, layer_activations):
+            layer_str = layer_str + f'({neuron_weights}, {neuron_bias}, {neuron_activation});'
+        layer_str = f"{layer_str[:-1]}\n"
+        network_str = network_str + f"{layer_str}\n"
+
+    file.write(input_str+network_str)
+    file.close()

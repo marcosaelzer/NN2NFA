@@ -1,1 +1,1 @@
-from .toy_nnet import generate_from_file, ToyNNetwork
+from .toy_nnet import generate_from_file, write_to_file, ToyNNetwork
