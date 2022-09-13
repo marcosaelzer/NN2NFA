@@ -147,6 +147,7 @@ def do_benchmarks(files):
         ax.label_outer()
     """
     fig.tight_layout()
+    plt.savefig('fixed_height_plot.png')
     plt.show()
 
 
