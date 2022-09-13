@@ -8,9 +8,13 @@ from nn2nfa.translation.translate_nn import build_nn_automaton
 from nn2nfa.nn_model.toy_nnet import generate_from_file, ToyNNetwork
 from nn2nfa.out_reach_properties.out_reach_property import OutReachProperty, Inequality
 
-def generate_nn(inputs, outputs, fixed_height):
+"""
+Test script for generating and translating neural networks where there is a fixed number of hidden layers 
+and the neurons per layer are increasing
+"""
+def generate_nn(inputs, outputs, fixed_height, neurons_per_layer):
     files = []
-    for n in range(1, 10):
+    for n in range(1, neurons_per_layer+1):
         filename = f'nn_fixed_height_{fixed_height}_{n}.toynnet'
         f = open(filename, 'w')
         files.append(filename)
@@ -18,7 +22,8 @@ def generate_nn(inputs, outputs, fixed_height):
 
         for i in range(fixed_height):
             ran_weights = [ran.choice([-1, 1]) for _ in range(inputs)]
-            f.write(f'({ran_weights}, 0, relu)')
+            ran_bias = ran.choice([-1, 1])
+            f.write(f'({ran_weights}, {ran_bias}, relu)')
             if i != fixed_height - 1:
                 f.write('; ')
             else:
@@ -27,7 +32,8 @@ def generate_nn(inputs, outputs, fixed_height):
         for i in range(n):
             for j in range(fixed_height):
                 ran_weights = [ran.choice([-1, 1]) for _ in range(fixed_height)]
-                f.write(f'({ran_weights}, 0, relu)')
+                ran_bias = ran.choice([-1, 1])
+                f.write(f'({ran_weights}, {ran_bias}, relu)')
                 if j != fixed_height - 1:
                     f.write('; ')
                 else:
@@ -35,7 +41,8 @@ def generate_nn(inputs, outputs, fixed_height):
 
         for i in range(outputs):
             ran_weights = [ran.choice([-1, 1]) for _ in range(fixed_height)]
-            f.write(f'({ran_weights}, 0, relu)')
+            ran_bias = ran.choice([-1, 1])
+            f.write(f'({ran_weights}, {ran_bias}, relu)')
             if i != outputs - 1:
                 f.write('; ')
             else:
@@ -106,11 +113,10 @@ def do_benchmarks(files):
     edges = []
     build_time = []
     for file in files:
-        props = OutReachProperty([Inequality([1], 10, True)], [Inequality([1], 10, False)])
         nn = generate_from_file(file)
         print(f'Translating {file}')
         start = time.time()
-        automaton = build_nn_automaton(nn, props)
+        automaton = build_nn_automaton(nn, None)
         end = time.time()
         res_time = end-start
         print(f'Built in {res_time} s')
@@ -123,28 +129,29 @@ def do_benchmarks(files):
 
     print(n)
     print(nodes)
-    fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(n, nodes)
-    axs[0, 0].set_title('Nodes')
-    axs[0, 1].plot(n, edges, 'tab:orange')
-    axs[0, 1].set_title('Edges')
-    axs[1, 0].plot(n, build_time, 'tab:green')
-    axs[1, 0].set_title('Built time')
-    axs[1, 1].plot(n, nodes, 'tab:red')
-    axs[1, 1].set_title('Axis [1, 1]')
+    print(edges)
+    print(build_time)
+    fig, ax = plt.subplots()
+    plt.title('Fixed amount of neurons per hidden layer')
+    ax.set(xlabel='hidden layers', ylabel='')
+    ax.set(ylabel='nodes and sec')
+    ax.plot(n, nodes)
+    ax.plot(n, build_time, 'tab:green')
 
-    for ax in axs.flat:
-        ax.set(xlabel='x-label', ylabel='y-label')
-
+    ax2 = ax.twinx()
+    ax2.set(ylabel='edges')
+    ax2.plot(n, edges, 'tab:orange')
     # Hide x labels and tick labels for top plots and y ticks for right plots.
+    """
     for ax in axs.flat:
         ax.label_outer()
-
+    """
+    fig.tight_layout()
     plt.show()
 
 
 
 
 if __name__ == '__main__':
-    files = generate_nn(1, 1, 2)
+    files = generate_nn(1, 1, 2, 5)
     do_benchmarks(files)
