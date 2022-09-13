@@ -19,7 +19,8 @@ def generate_nn(inputs, outputs, fixed_width, hidden_layers):
 
         for i in range(n):
             ran_weights = [ran.choice([-1, 1]) for _ in range(inputs)]
-            f.write(f'({ran_weights}, 0, relu)')
+            ran_bias = ran.choice([-1, 1])
+            f.write(f'({ran_weights}, {ran_bias}, relu)')
             if i != n - 1:
                 f.write('; ')
             else:
@@ -28,7 +29,8 @@ def generate_nn(inputs, outputs, fixed_width, hidden_layers):
         for i in range(fixed_width):
             for j in range(n):
                 ran_weights = [ran.choice([-1, 1]) for _ in range(n)]
-                f.write(f'({ran_weights}, 0, relu)')
+                ran_bias = ran.choice([-1, 1])
+                f.write(f'({ran_weights}, {ran_bias}, relu)')
                 if j != n - 1:
                     f.write('; ')
                 else:
@@ -36,7 +38,8 @@ def generate_nn(inputs, outputs, fixed_width, hidden_layers):
 
         for i in range(outputs):
             ran_weights = [ran.choice([-1, 1]) for _ in range(n)]
-            f.write(f'({ran_weights}, 0, relu)')
+            ran_bias = ran.choice([-1, 1])
+            f.write(f'({ran_weights}, {ran_bias}, relu)')
             if i != outputs - 1:
                 f.write('; ')
             else:
@@ -141,11 +144,12 @@ def do_benchmarks(files):
         ax.label_outer()
     """
     fig.tight_layout()
+    plt.savefig('fixed_width_plot.png')
     plt.show()
 
 
 
 
 if __name__ == '__main__':
-    files = generate_nn(2, 2, 1, 8)
+    files = generate_nn(2, 2, 1, 4)
     do_benchmarks(files)
