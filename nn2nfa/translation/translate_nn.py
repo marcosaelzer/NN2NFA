@@ -41,25 +41,25 @@ def build_neuron_automaton(prev_layer_automaton: Automaton, weights, bias, activ
 
     neuron_automaton = builder.join_automata(list(prev_layer_automaton.output_tapes), prev_layer_automaton, lin_comb_automaton)
     neuron_automaton.project_onto_necessary_tapes()
-    print(f'Automata layer {layer_index} number {i}')
     neuron_automaton.minimize()
     #print(neuron_automaton)
     #print(neuron_automaton.is_deterministic())
     return neuron_automaton
 
 
-def build_layer_automaton(neuron_automata: list) -> Automaton:
+def build_layer_automaton(neuron_automata: list, layer_index) -> Automaton:
+    print(f'Building layer {layer_index+1}')
     joined_automaton = neuron_automata.pop(0)
     while len(neuron_automata) != 0:
         next = neuron_automata.pop(0)
-        print('Joine neuron zu layer')
         joined_automaton = builder.join_automata(list(joined_automaton.input_tapes), joined_automaton, next)
+        print(f'Nodes before minimization: {joined_automaton.get_number_of_states()}')
         joined_automaton.minimize()
+        print(f'Nodes after minimization: {joined_automaton.get_number_of_states()}')
     # ToDo: Make all results output tapes !!!
     full_set = {i for i in range(joined_automaton.tape_size)}
     new_outputs = full_set.difference(joined_automaton.input_tapes)
     joined_automaton.output_tapes = new_outputs
-
     return joined_automaton
 
 def build_id_automaton(input_size):
@@ -96,7 +96,7 @@ def build_nn_automaton(nn: ToyNNetwork):
     current_automaton = build_id_automaton(nn.input_size)
     for i in range(nn.get_layer_count()):
         neuron_automata = build_neuron_automata_parallel(nn, current_automaton, i)
-        current_automaton = build_layer_automaton(neuron_automata)
+        current_automaton = build_layer_automaton(neuron_automata, i)
         print(f'Built layer {i}: with: {current_automaton.get_number_of_states()} states')
 
     return current_automaton

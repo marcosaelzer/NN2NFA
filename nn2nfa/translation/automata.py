@@ -501,7 +501,6 @@ class Automaton:
 
         """
 
-        print(f'Minimizing automaton with {self.get_meta()}')
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
         if self.get_number_of_states() < 30000:
@@ -530,7 +529,7 @@ class Automaton:
             self.__make_initial(s)
 
         self.__shrink_to(self.__reachables())
-        print(f'Minimiert zu: {self.get_meta()}')
+
         return self
 
     """
