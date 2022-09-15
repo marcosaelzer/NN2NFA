@@ -2,14 +2,11 @@ import time
 import glob
 from nn2nfa.translation.translate_nn import build_nn_automaton
 from nn2nfa.nn_model.toy_nnet import generate_from_file
-
 """
-Test script for translating neural networks where there is a fixed number of hidden layers 
-and the neurons per layer are increasing
+Test script for generating and translating neural networks where each hidden layer has a fixed number of neurons
 """
-
 def do_benchmarks(files):
-    n = [i for i in range(1, len(files)+1)]
+    n = [2+i for i in range(1, len(files)+1)]
     nodes = []
     edges = []
     build_time = []
@@ -17,7 +14,7 @@ def do_benchmarks(files):
         nn = generate_from_file(file)
         print(f'Translating {file}')
         start = time.time()
-        automaton = build_nn_automaton(nn, None)
+        automaton = build_nn_automaton(nn)
         end = time.time()
         res_time = end-start
         print(f'Built in {res_time} s')
@@ -36,7 +33,6 @@ def do_benchmarks(files):
 
 
 if __name__ == '__main__':
-    #files = generate_nn(1, 1, 2, 8)
-    files = sorted(glob.glob('./fixed_neuro_inc_layer/*.toynnet'))
+    files = sorted(glob.glob('../assets/benchmark_networks/*.toynnet'))
     print(files)
     do_benchmarks(files)

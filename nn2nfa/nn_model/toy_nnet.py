@@ -12,8 +12,6 @@ from .parser.ToyNNetListener import ToyNNetListener
 
 import numpy as np
 
-from ..out_reach_properties.out_reach_property import OutReachProperty
-
 
 class _ToyNNetGenerator(ToyNNetListener):
     """ Generator to read in toy neural networks from *.txt

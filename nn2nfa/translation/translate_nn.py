@@ -2,7 +2,6 @@ from typing import List
 
 from nn2nfa.translation.automata_builder import Automaton
 from nn2nfa.nn_model.toy_nnet import ToyNNetwork
-from nn2nfa.out_reach_properties.out_reach_property import OutReachProperty, Inequality
 import nn2nfa.translation.automata_builder as builder
 import multiprocessing as mp
 
@@ -76,22 +75,6 @@ def build_id_automaton(input_size):
     #print('Input Automaton')
     return automaton
 
-def build_input_properties(props: List[Inequality]):
-    if len(props) == 0:
-        return
-
-    prop = props.pop()
-    current_automaton = builder.build_linear_eq_acc(prop.left_side, -prop.right_side, prop.leq)
-    for prop in props:
-        prop_automaton = builder.build_linear_eq_acc(prop.left_side, -prop.right_side, prop.leq)
-        current_automaton = builder.join_automata(list(current_automaton.input_tapes), prop_automaton, current_automaton)
-        current_automaton.input_tapes = {i for i in range(current_automaton.tape_size)}
-        current_automaton.output_tapes = {i for i in range(current_automaton.tape_size)}
-        current_automaton.minimize()
-    current_automaton.input_tapes = {i for i in range(current_automaton.tape_size)}
-    current_automaton.output_tapes = {i for i in range(current_automaton.tape_size)}
-    return current_automaton
-
 def build_output_properties(props: list):
     if len(props) == 0:
         return
@@ -109,21 +92,11 @@ def build_output_properties(props: list):
     return current_automaton
 
 
-def build_nn_automaton(nn: ToyNNetwork, properties: OutReachProperty = None):
-    if properties is None:
-        current_automaton = build_id_automaton(nn.input_size)
-        out_automaton = None
-    else:
-        current_automaton = build_input_properties(properties.input_specification)
-        out_automaton = build_output_properties(properties.output_specification)
+def build_nn_automaton(nn: ToyNNetwork):
+    current_automaton = build_id_automaton(nn.input_size)
     for i in range(nn.get_layer_count()):
         neuron_automata = build_neuron_automata_parallel(nn, current_automaton, i)
         current_automaton = build_layer_automaton(neuron_automata)
         print(f'Built layer {i}: with: {current_automaton.get_number_of_states()} states')
 
-    if out_automaton is not None:
-         pass
-         #current_automaton = builder.join_automata(current_automaton.output_tapes, current_automaton, out_automaton)
-    #print('Finished building now minimizing')
-    #current_automaton.minimize()
     return current_automaton
