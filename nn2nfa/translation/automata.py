@@ -323,12 +323,17 @@ class Automaton:
         fs = self.end_states
 
         sim = {(p, q) for p in range(n - 1) for q in range(p, n) if
-               (p not in fs or q in fs) and (p in fs or q not in fs) and p != q}
-        old_sim = set()
+               (p not in fs or q in fs) and (p in fs or q not in fs) and p != q and len(
+                   self.get_successor_symbols(p)) == len(self.get_successor_symbols(q))}
+        #old_sim = set()
         # turn sim into largest bisimulation by successively removing pairs (p,q) such that p is not bisimilar to q
-        while sim != old_sim:
-            old_sim = sim.copy()
-            for (p, q) in old_sim:
+        change = True
+        while change:
+            change = False
+            old_size = len(sim)
+            #old_sim = sim.copy()
+            to_remove = set()
+            for (p, q) in sim:
                 is_bisimilar = True
                 for a in self.alphabet:
                     p_succs = self.get_successors(p, a)
@@ -362,7 +367,10 @@ class Automaton:
                         break
                     """
                 if not is_bisimilar:
-                    sim.discard((p, q))
+                    to_remove.add((p, q))
+            sim = sim.intersection(to_remove)
+            if len(sim) != old_size:
+                change = True
         return sim
 
     def __merge_states(self, replacements):
@@ -492,10 +500,11 @@ class Automaton:
         Returns:
 
         """
+
         print(f'Minimizing automaton with {self.get_meta()}')
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
-        if self.get_number_of_states() < 3000:
+        if self.get_number_of_states() < 30000:
             # standard variant
             mergable = self.bisimulation_pairs()
             for (p, q) in mergable:
@@ -537,6 +546,14 @@ class Automaton:
                 successors.add(t)"""
 
         return self.successors[p][a]
+
+    def get_successor_symbols(self, p) -> set:
+        successors = set()
+        """for _, t, w in self.graph.out_edges(p, keys=True):
+            if w == a:
+                successors.add(t)"""
+
+        return self.successors[p].keys()
 
     def get_input_tape_matching_successors(self, p, a, tapes) -> set:
         """
