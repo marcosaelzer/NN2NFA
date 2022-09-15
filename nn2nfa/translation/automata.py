@@ -500,7 +500,6 @@ class Automaton:
         Returns:
 
         """
-
         replacements = {p: p for p in range(0, self.get_number_of_states())}
 
         if self.get_number_of_states() < 30000:

@@ -6,7 +6,7 @@ from nn2nfa.nn_model.toy_nnet import generate_from_file
 Test script for generating and translating neural networks where each hidden layer has a fixed number of neurons
 """
 def do_benchmarks(files):
-    n = [2+i for i in range(1, len(files)+1)]
+    n = [i for i in range(1, len(files)+1)]
     nodes = []
     edges = []
     build_time = []
@@ -33,6 +33,6 @@ def do_benchmarks(files):
 
 
 if __name__ == '__main__':
-    files = sorted(glob.glob('../assets/benchmark_networks/*.toynnet'))
+    files = sorted(glob.glob('../assets/benchmark_a/*.toynnet'))
     print(files)
     do_benchmarks(files)
