@@ -1,0 +1,3 @@
+input_size=1
+([-1], 1, relu);([-1], 1, relu)
+

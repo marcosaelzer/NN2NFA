@@ -2,7 +2,7 @@ from nn2nfa.translation.automata import Automaton, SumAutomaton
 from nn2nfa.translation.automata_utils import join_automata, join_pos_input_multiplier_with_sum, join_multiplier_sum
 import math
 
-def build_bruse_multiplier(c: int) -> Automaton:
+def build_efficient_multipliert(c: int) -> Automaton:
     c = int(abs(c))
     mult_automaton = Automaton()
     mult_automaton.start_states = {0}
@@ -28,7 +28,7 @@ def build_bruse_multiplier(c: int) -> Automaton:
     return mult_automaton
 
 def build_signed_multiplier(c: int) -> Automaton:
-    mult_automaton = build_bruse_multiplier(c)
+    mult_automaton = build_efficient_multipliert(c)
     new_state = mult_automaton.get_number_of_states()
     mult_0_state = new_state + 1
     mult_automaton.start_states = {new_state}
@@ -54,7 +54,7 @@ def build_signed_multiplier(c: int) -> Automaton:
 
 
 def build_pos_input_multiplier(c: int) -> Automaton:
-    mult_automaton = build_bruse_multiplier(c)
+    mult_automaton = build_efficient_multipliert(c)
     new_state = mult_automaton.get_number_of_states()
     mult_0_state = new_state + 1
     mult_automaton.start_states = {new_state}
@@ -75,7 +75,7 @@ def build_pos_input_multiplier(c: int) -> Automaton:
     return mult_automaton
 
 
-def build_pos_input_n_multiplier(weights: list) -> Automaton:
+def build_pos_input_n_multiplier(weights: list, minimize: bool) -> Automaton:
     n = len(weights)
     automaton = Automaton()
     automaton.tape_size = n
@@ -92,14 +92,14 @@ def build_pos_input_n_multiplier(weights: list) -> Automaton:
     current_weight_index = 1
     while current_weight_index < n:
         automaton = join_automata([current_weight_index], automaton, build_pos_input_multiplier(weights[current_weight_index]))
-        #automaton.minimize()
         current_weight_index += 1
-    automaton.minimize()
+    if minimize:
+        automaton.minimize()
     for i in range(n):
         automaton.output_tapes.add(n+i)
     return automaton
 
-def build_signed_n_multiplier(weights: list) -> Automaton:
+def build_signed_n_multiplier(weights: list, minimize: bool) -> Automaton:
     n = len(weights)
     automaton = Automaton()
     automaton.tape_size = n
@@ -117,10 +117,10 @@ def build_signed_n_multiplier(weights: list) -> Automaton:
     current_weight_index = 1
     while current_weight_index < n:
         automaton = join_automata([current_weight_index], automaton, build_signed_multiplier(weights[current_weight_index]))
-        #automaton.minimize()
         current_weight_index += 1
 
-    automaton.minimize()
+    if minimize:
+        automaton.minimize()
     for i in range(n):
         automaton.output_tapes.add(n+i)
     return automaton
@@ -130,16 +130,14 @@ def build_n_adder(n: int, signs: list, res_sign=0, bias=0):
     return SumAutomaton(n, signs, res_sign, bias)
 
 
-def build_pos_input_lin_comb_automaton(weights: list, bias, activation: str = 'relu'):
+def build_pos_input_lin_comb_automaton(weights: list, bias, minimize: bool, activation: str = 'relu'):
     n = len(weights)
     signs = [0 if w >= 0 else 1 for w in weights]
     pos_adder = SumAutomaton(n, signs, 0, bias)
     neg_adder = SumAutomaton(n, signs, 1, bias)
-    multiplier = build_pos_input_n_multiplier(weights)
+    multiplier = build_pos_input_n_multiplier(weights, minimize)
 
     res_automaton = join_pos_input_multiplier_with_sum(list({i for i in range(multiplier.tape_size)}.difference(multiplier.input_tapes)), multiplier, pos_adder, neg_adder, activation)
-    #res_automaton.project_onto_necessary_tapes()
-    #res_automaton.minimize()
     return res_automaton
 
 def build_linear_eq_acc(weights: list, bias, leq: bool):
@@ -169,14 +167,15 @@ def build_linear_eq_acc(weights: list, bias, leq: bool):
     automaton.project_onto_necessary_tapes()
     return automaton
 
-def build_signed_lin_comb_automaton(weights: list, bias, activation: str = 'relu'):
+def build_signed_lin_comb_automaton(weights: list, bias, minimize: bool, activation: str = 'relu'):
     n = len(weights)
     pos_adder = SumAutomaton(n, None, 0, bias)
     neg_adder = SumAutomaton(n, None, 1, bias)
-    multiplier = build_signed_n_multiplier(weights)
+    multiplier = build_signed_n_multiplier(weights, minimize)
 
     res_automaton = join_multiplier_sum(list({i for i in range(multiplier.tape_size)}.difference(multiplier.input_tapes)),
                                       multiplier, pos_adder, neg_adder, activation)
 
-    res_automaton.minimize()
+    if minimize:
+        res_automaton.minimize()
     return res_automaton

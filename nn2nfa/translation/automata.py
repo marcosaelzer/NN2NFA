@@ -658,7 +658,7 @@ class Automaton:
         return out_str
 
     def get_meta(self):
-        out_str = f'{len(self.states)} states and {len(self.get_edges())} edges'
+        out_str = f'{len(self.states)} states and {len(self.get_edges())} transitions'
         return out_str
 
     def get_number_of_edges(self):
