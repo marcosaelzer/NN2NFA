@@ -1,7 +1,7 @@
 # Translating DNN to Finite Automata
 
 Proof-of-Concept implementation of the DNN to finite automata translation proposed in the paper 
-*Verifying and Interpreting Neural Networks Using Finite Automata*. 
+[Verifying and Interpreting Neural Networks Using Finite Automata](https://doi.org/10.48550/arXiv.2211.01022). 
 
 ## Overview
 This repository represents a proof-of-concept implementation for translating neural networks with
